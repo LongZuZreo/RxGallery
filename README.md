@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # RxGalleryFinal
 
 
@@ -321,3 +322,7 @@
    * [RxGalleryFinal Version](https://github.com/FinalTeam/RxGalleryFinal/wiki/RxGalleryFinal-Version)
 
 
+=======
+# RxGallery
+the album library base on RxGalleryFinal
+>>>>>>> 9479f5f0e4272794841927a1108895807d9ae56d
