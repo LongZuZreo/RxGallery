@@ -19,7 +19,7 @@ public class GlideImageLoader implements AbsImageLoader {
 
     @Override
     public void displayImage(Context context, String path, FixImageView imageView, Drawable defaultDrawable, Bitmap.Config config, boolean resize, boolean isGif, int width, int height, int rotate) {
-//        DrawableRequestBuilder builder;
+//        DrawableRequestBuilder builder;git
 //        if (path != null) {
 //            builder = Glide.with(context)
 //                    .load(new File(path)).
