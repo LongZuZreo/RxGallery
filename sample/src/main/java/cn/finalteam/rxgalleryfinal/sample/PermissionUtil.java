@@ -16,6 +16,7 @@
 package cn.finalteam.rxgalleryfinal.sample;
 
 import android.Manifest;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.tbruyelle.rxpermissions2.Permission;
@@ -25,9 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Observer;
-import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
-
 
 /**
  * ================================================
