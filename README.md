@@ -2,7 +2,8 @@ the album library base on RxGalleryFinal
 
 支持用RxJava的方式回调crop之后的图片
 
-============================================
+
+```
 
 RxGalleryFinal
                 .with(MainActivity.this)
@@ -25,9 +26,4 @@ RxGalleryFinal
                 })
                 .openGallery();
 
-
-
-
-
-
-=============================================
+```
