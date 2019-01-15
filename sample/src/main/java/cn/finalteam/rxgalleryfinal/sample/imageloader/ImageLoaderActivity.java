@@ -67,7 +67,7 @@ public class ImageLoaderActivity extends AppCompatActivity {
                 .radio()
                 .gif(appCompatCheckBox.isChecked())
                 .imageLoader(imageLoaderType)
-                .subscribe(new RxBusResultDisposable<ImageRadioResultEvent>() {
+                .subscribeGalleryListener(new RxBusResultDisposable<ImageRadioResultEvent>() {
                     @Override
                     protected void onEvent(ImageRadioResultEvent imageRadioResultEvent) throws Exception {
                         Toast.makeText(getBaseContext(), "选中了图片路径：" + imageRadioResultEvent.getResult().getOriginalPath(), Toast.LENGTH_SHORT).show();

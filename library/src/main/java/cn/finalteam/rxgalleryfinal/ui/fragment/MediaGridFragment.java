@@ -46,6 +46,7 @@ import cn.finalteam.rxgalleryfinal.presenter.impl.MediaGridPresenterImpl;
 import cn.finalteam.rxgalleryfinal.rxbus.RxBus;
 import cn.finalteam.rxgalleryfinal.rxbus.RxBusDisposable;
 import cn.finalteam.rxgalleryfinal.rxbus.event.CloseMediaViewPageFragmentEvent;
+import cn.finalteam.rxgalleryfinal.rxbus.event.ImageCropResultEvent;
 import cn.finalteam.rxgalleryfinal.rxbus.event.ImageRadioResultEvent;
 import cn.finalteam.rxgalleryfinal.rxbus.event.MediaCheckChangeEvent;
 import cn.finalteam.rxgalleryfinal.rxbus.event.OpenMediaPageFragmentEvent;
@@ -90,8 +91,6 @@ public class MediaGridFragment extends BaseFragment implements MediaGridView, Re
         FooterAdapter.OnItemClickListener, View.OnClickListener, MediaScanner.ScanCallback, BucketAdapter.OnRecyclerViewItemClickListener {
 
     private static final String IMAGE_TYPE = "image/jpeg";
-    //接口-单选-是否裁剪
-    public static IRadioImageCheckedListener iListenerRadio;
     //预留公开命名接口
     private static File mImageStoreDir;
     private static File mImageStoreCropDir; //裁剪目录
@@ -224,10 +223,6 @@ public class MediaGridFragment extends BaseFragment implements MediaGridView, Re
             mImageStoreCropDir.mkdirs();
         }
         Logger.i("设置图片裁剪保存路径为：" + mImageStoreCropDir.getAbsolutePath());
-    }
-
-    public static void setRadioListener(IRadioImageCheckedListener radioListener) {
-        MediaGridFragment.iListenerRadio = radioListener;
     }
 
     @Override
@@ -688,22 +683,17 @@ public class MediaGridFragment extends BaseFragment implements MediaGridView, Re
      * .putExtra(UCrop.EXTRA_OUTPUT_IMAGE_HEIGHT, imageHeight)
      */
     private void onCropFinished() {
-        if (iListenerRadio != null && mCropPath != null) {
+        if (mCropPath != null) {
             if (mConfiguration.isCrop()) {
-                iListenerRadio.cropAfter(mCropPath);
+                RxBus.getDefault().post(new ImageCropResultEvent(mCropPath.getPath()));
             }
         } else {
             Logger.i("# CropPath is null！# ");
         }
-        //裁剪默认会关掉这个界面. 实现接口返回true则不关闭.
-        if (iListenerRadio == null) {
-            getActivity().finish();
-        } else {
-            boolean flag = iListenerRadio.isActivityFinish();
+            boolean flag = mConfiguration.isRadioPageFinish();
             Logger.i("# crop image is flag # :" + flag);
             if (flag)
                 getActivity().finish();
-        }
     }
 
     @Override
@@ -744,6 +734,7 @@ public class MediaGridFragment extends BaseFragment implements MediaGridView, Re
     public void onDestroy() {
         super.onDestroy();
         mMediaScanner.unScanFile();
+        mMediaActivity = null;
     }
 
     @Override
@@ -882,4 +873,6 @@ public class MediaGridFragment extends BaseFragment implements MediaGridView, Re
             setImageStoreCropDir(mImageStoreCropDir);
         }
     }
+
+
 }

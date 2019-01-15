@@ -12,6 +12,7 @@ import android.widget.Toast;
 import com.yalantis.ucrop.UCropActivity;
 import com.yalantis.ucrop.model.AspectRatio;
 
+import java.util.IllegalFormatCodePointException;
 import java.util.List;
 
 import cn.finalteam.rxgalleryfinal.bean.MediaBean;
@@ -19,6 +20,7 @@ import cn.finalteam.rxgalleryfinal.imageloader.ImageLoaderType;
 import cn.finalteam.rxgalleryfinal.rxbus.RxBus;
 import cn.finalteam.rxgalleryfinal.rxbus.RxBusResultDisposable;
 import cn.finalteam.rxgalleryfinal.rxbus.event.BaseResultEvent;
+import cn.finalteam.rxgalleryfinal.rxbus.event.ImageCropResultEvent;
 import cn.finalteam.rxgalleryfinal.rxbus.event.ImageMultipleResultEvent;
 import cn.finalteam.rxgalleryfinal.rxbus.event.ImageRadioResultEvent;
 import cn.finalteam.rxgalleryfinal.ui.activity.MediaActivity;
@@ -36,6 +38,7 @@ public class RxGalleryFinal {
 
     private Configuration configuration = new Configuration();
     private RxBusResultDisposable<BaseResultEvent> isRadioDisposable;
+    private RxBusResultDisposable<BaseResultEvent> isCropDisposable;
 
     private RxGalleryFinal() {
     }
@@ -262,8 +265,16 @@ public class RxGalleryFinal {
     /**
      * 设置回调
      */
-    public RxGalleryFinal subscribe(@NonNull RxBusResultDisposable<? extends BaseResultEvent> rxBusResultSubscriber) {
+    public RxGalleryFinal subscribeGalleryListener(@NonNull RxBusResultDisposable<? extends BaseResultEvent> rxBusResultSubscriber) {
         this.isRadioDisposable = (RxBusResultDisposable<BaseResultEvent>) rxBusResultSubscriber;
+        return this;
+    }
+
+    /**
+     *
+     */
+    public RxGalleryFinal subscribeCropListener(@NonNull RxBusResultDisposable<? extends BaseResultEvent> rxBusResultSunscriber){
+        this.isCropDisposable = (RxBusResultDisposable<BaseResultEvent>) rxBusResultSunscriber;
         return this;
     }
 
@@ -304,7 +315,19 @@ public class RxGalleryFinal {
                     .toObservable(ImageMultipleResultEvent.class)
                     .subscribeWith(isRadioDisposable);
         }
-        RxBus.getDefault().add(disposable);
+
+        Disposable cropDisposable;
+
+        if (configuration.isCrop()&& isCropDisposable!=null){
+            cropDisposable = RxBus.getDefault()
+                    .toObservable(ImageCropResultEvent.class)
+                    .subscribeWith(isCropDisposable);
+            RxBus.getDefault().add(cropDisposable);
+        }
+
+
+
+
 
         Intent intent = new Intent(context, MediaActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

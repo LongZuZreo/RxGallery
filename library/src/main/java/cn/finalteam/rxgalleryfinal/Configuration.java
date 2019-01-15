@@ -51,6 +51,7 @@ public class Configuration implements Parcelable {
     private boolean isPlayGif;
     private boolean hidePreview;
     private boolean isVideoPreview;
+    private boolean isRadioPageFinish = true;
 
     //==========UCrop START==========
     //是否隐藏裁剪页面底部控制栏,默认显示
@@ -341,6 +342,14 @@ public class Configuration implements Parcelable {
         return 0;
     }
 
+    public boolean isRadioPageFinish() {
+        return isRadioPageFinish;
+    }
+
+    public void isRadioPageFinish(boolean isRadioPageFinish){
+        this.isRadioPageFinish = isRadioPageFinish;
+    }
+
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeByte((byte) (image ? 1 : 0));
@@ -367,6 +376,7 @@ public class Configuration implements Parcelable {
         parcel.writeByte((byte) (isPlayGif ? 1 : 0));
         parcel.writeByte((byte) (hidePreview ? 1 : 0));
         parcel.writeByte((byte) (isVideoPreview ? 1 : 0));
+        parcel.writeByte((byte) (isRadioPageFinish ? 1 : 0));
     }
 
     public boolean isVideoPreview() {

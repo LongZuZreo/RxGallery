@@ -14,6 +14,7 @@ public class MediaScanner {
     private String fileType = null;
     private String[] filePaths = null;
     private ScanCallback scanCallback;
+    private Context context;
 
     /**
      * 然后调用MediaScanner.scanFile("/sdcard/2.mp3");
@@ -21,7 +22,7 @@ public class MediaScanner {
     public MediaScanner(Context context) {
         MusicSannerClient client;
         client = new MusicSannerClient();
-
+        this.context = context;
         if (mediaScanConn == null) {
             mediaScanConn = new MediaScannerConnection(context, client);
         }
@@ -55,6 +56,8 @@ public class MediaScanner {
 
     public void unScanFile() {
         mediaScanConn.disconnect();
+        context = null;
+        mediaScanConn = null;
     }
 
     public interface ScanCallback {

@@ -19,18 +19,5 @@ public class RxGalleryListener {
         return RxGalleryListenerHolder.RX_GALLERY_LISTENER;
     }
 
-    /**
-     * 图片多选的事件
-     */
-    public void setMultiImageCheckedListener(IMultiImageCheckedListener checkedImageListener) {
-        MediaGridAdapter.setCheckedListener(checkedImageListener);
-    }
 
-
-    /**
-     * 图片单选的事件
-     */
-    public void setRadioImageCheckedListener(IRadioImageCheckedListener checkedImageListener) {
-        MediaGridFragment.setRadioListener(checkedImageListener);
-    }
 }

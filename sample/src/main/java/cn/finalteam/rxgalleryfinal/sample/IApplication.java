@@ -21,6 +21,7 @@ public class IApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
         //打开日志
         ModelUtils.setDebugModel(true);
         Fresco.initialize(this);

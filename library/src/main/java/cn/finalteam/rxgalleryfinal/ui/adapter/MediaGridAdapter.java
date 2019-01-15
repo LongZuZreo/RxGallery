@@ -2,6 +2,8 @@ package cn.finalteam.rxgalleryfinal.ui.adapter;
 
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
+import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.CompoundButtonCompat;
 import android.support.v7.widget.AppCompatCheckBox;
@@ -14,6 +16,7 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.facebook.drawee.view.SimpleDraweeView;
 
@@ -30,7 +33,6 @@ import cn.finalteam.rxgalleryfinal.rxjob.Job;
 import cn.finalteam.rxgalleryfinal.rxjob.RxJob;
 import cn.finalteam.rxgalleryfinal.rxjob.job.ImageThmbnailJobCreate;
 import cn.finalteam.rxgalleryfinal.ui.activity.MediaActivity;
-import cn.finalteam.rxgalleryfinal.ui.base.IMultiImageCheckedListener;
 import cn.finalteam.rxgalleryfinal.ui.widget.FixImageView;
 import cn.finalteam.rxgalleryfinal.ui.widget.SquareRelativeLayout;
 import cn.finalteam.rxgalleryfinal.utils.Logger;
@@ -44,8 +46,7 @@ import cn.finalteam.rxgalleryfinal.utils.ThemeUtils;
  */
 public class MediaGridAdapter extends RecyclerView.Adapter<MediaGridAdapter.GridViewHolder> {
 
-    private static IMultiImageCheckedListener iMultiImageCheckedListener;
-    private final MediaActivity mMediaActivity;
+    private  MediaActivity mMediaActivity;
     private final List<MediaBean> mMediaBeanList;
     private final int mImageSize;
     private final Configuration mConfiguration;
@@ -72,10 +73,6 @@ public class MediaGridAdapter extends RecyclerView.Adapter<MediaGridAdapter.Grid
         this.mCameraImage = ThemeUtils.resolveDrawable(mMediaActivity, R.attr.gallery_camera_image, R.drawable.gallery_ic_camera);
         this.mCameraImageBgColor = ThemeUtils.resolveColor(mMediaActivity, R.attr.gallery_camera_bg, R.color.gallery_default_camera_bg_color);
         this.mCameraTextColor = ThemeUtils.resolveColor(mMediaActivity, R.attr.gallery_take_image_text_color, R.color.gallery_default_take_image_text_color);
-    }
-
-    public static void setCheckedListener(IMultiImageCheckedListener checkedListener) {
-        iMultiImageCheckedListener = checkedListener;
     }
 
     @Override
@@ -211,15 +208,15 @@ public class MediaGridAdapter extends RecyclerView.Adapter<MediaGridAdapter.Grid
                     !mMediaActivity.getCheckedList().contains(mediaBean)) {
                 AppCompatCheckBox checkBox = (AppCompatCheckBox) buttonView;
                 checkBox.setChecked(false);
-                Logger.i("选中：" + mMediaActivity.getResources().getString(R.string.gallery_image_max_size_tip, mConfiguration.getMaxSize()));
-                if (iMultiImageCheckedListener != null) {
-                    iMultiImageCheckedListener.selectedImgMax(buttonView, isChecked, mConfiguration.getMaxSize());
-                }
-            } else {
-                if (iMultiImageCheckedListener != null)
-                    iMultiImageCheckedListener.selectedImg(buttonView, isChecked);
+                Toast.makeText(mMediaActivity, "你最多只能选择" + mConfiguration.getMaxSize() + "张图片", Toast.LENGTH_SHORT).show();
             }
 
         }
+    }
+
+    @Override
+    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView);
+        mMediaActivity = null;
     }
 }

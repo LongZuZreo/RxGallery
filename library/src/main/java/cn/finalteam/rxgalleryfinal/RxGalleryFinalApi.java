@@ -23,6 +23,8 @@ import java.util.Random;
 
 import cn.finalteam.rxgalleryfinal.imageloader.ImageLoaderType;
 import cn.finalteam.rxgalleryfinal.rxbus.RxBusResultDisposable;
+import cn.finalteam.rxgalleryfinal.rxbus.event.BaseResultEvent;
+import cn.finalteam.rxgalleryfinal.rxbus.event.ImageCropResultEvent;
 import cn.finalteam.rxgalleryfinal.rxbus.event.ImageMultipleResultEvent;
 import cn.finalteam.rxgalleryfinal.rxbus.event.ImageRadioResultEvent;
 import cn.finalteam.rxgalleryfinal.ui.RxGalleryListener;
@@ -55,7 +57,7 @@ public class RxGalleryFinalApi {
         }
         rxGalleryFinal = RxGalleryFinal.with(context)
                 .imageLoader(ImageLoaderType.GLIDE)
-                .subscribe(null);
+                .subscribeGalleryListener(null);
         Logger.i("==========" + mRxApi + "====" + rxGalleryFinal);
         return mRxApi;
     }
@@ -77,7 +79,7 @@ public class RxGalleryFinalApi {
                     .image()
                     .radio()
                     .imageLoader(ImageLoaderType.GLIDE)
-                    .subscribe(rxBusResultDisposable)
+                    .subscribeGalleryListener(rxBusResultDisposable)
                     .openGallery();
         } else {
             rxGalleryFinal
@@ -85,7 +87,7 @@ public class RxGalleryFinalApi {
                     .radio()
                     .crop()
                     .imageLoader(ImageLoaderType.GLIDE)
-                    .subscribe(rxBusResultDisposable)
+                    .subscribeGalleryListener(rxBusResultDisposable)
                     .openGallery();
         }
         return mRxApi;
@@ -96,20 +98,20 @@ public class RxGalleryFinalApi {
      *
      * @return RxGalleryFinalApi
      */
-    public RxGalleryFinalApi onCropImageResult(IRadioImageCheckedListener listener) {
-        RxGalleryListener.getInstance().setRadioImageCheckedListener(listener);
+    public RxGalleryFinalApi onCropImageResult(RxBusResultDisposable<ImageCropResultEvent> listener) {
+        rxGalleryFinal.subscribeCropListener(listener);
         return mRxApi;
     }
 
-    /**
-     * 得到裁剪之后的事件
-     *
-     * @return RxGalleryFinalApi
-     */
-    public static RxGalleryFinalApi onMultiImageResult(IMultiImageCheckedListener listener) {
-        RxGalleryListener.getInstance().setMultiImageCheckedListener(listener);
-        return mRxApi;
-    }
+//    /**
+ //     * 得到裁剪之后的事件
+ //     *
+ //     * @return RxGalleryFinalApi
+ //     */
+//    public static RxGalleryFinalApi onMultiImageResult(IMultiImageCheckedListener listener) {
+//        RxGalleryListener.getInstance().setMultiImageCheckedListener(listener);
+//        return mRxApi;
+//    }
 
     /**
      * 得到多选限制事件
@@ -133,7 +135,7 @@ public class RxGalleryFinalApi {
                 .radio()
                 .crop()
                 .imageLoader(ImageLoaderType.GLIDE)
-                .subscribe(rxBusResultDisposable)
+                .subscribeGalleryListener(rxBusResultDisposable)
                 .openGallery();
         return mRxApi;
     }
@@ -164,7 +166,7 @@ public class RxGalleryFinalApi {
                 .radio()
                 .crop()
                 .imageLoader(ImageLoaderType.GLIDE)
-                .subscribe(rxBusResultDisposable)
+                .subscribeGalleryListener(rxBusResultDisposable)
                 .openGallery();
     }
 
@@ -184,7 +186,7 @@ public class RxGalleryFinalApi {
                 .multiple()
                 .crop()
                 .imageLoader(ImageLoaderType.GLIDE)
-                .subscribe(rxBusResultDisposable)
+                .subscribeGalleryListener(rxBusResultDisposable)
                 .openGallery();
     }
 
@@ -205,7 +207,7 @@ public class RxGalleryFinalApi {
                 .multiple()
                 .crop()
                 .imageLoader(ImageLoaderType.GLIDE)
-                .subscribe(rxBusResultDisposable)
+                .subscribeGalleryListener(rxBusResultDisposable)
                 .openGallery();
     }
 
@@ -224,7 +226,7 @@ public class RxGalleryFinalApi {
                 .multiple()
                 .video()
                 .imageLoader(ImageLoaderType.GLIDE)
-                .subscribe(rxBusResultDisposable)
+                .subscribeGalleryListener(rxBusResultDisposable)
                 .openGallery();
     }
 
@@ -245,7 +247,7 @@ public class RxGalleryFinalApi {
                 .multiple()
                 .maxSize(9)
                 .imageLoader(ImageLoaderType.UNIVERSAL)
-                .subscribe(rxBusResultDisposable)
+                .subscribeGalleryListener(rxBusResultDisposable)
                 .openGallery();
     }
 
@@ -522,7 +524,7 @@ public class RxGalleryFinalApi {
      */
     public RxGalleryFinalApi setImageRadioResultEvent(RxBusResultDisposable<ImageRadioResultEvent> t) {
         rxGalleryFinal.image();
-        rxGalleryFinal.subscribe(t);
+        rxGalleryFinal.subscribeGalleryListener(t);
         return mRxApi;
     }
 
@@ -531,7 +533,7 @@ public class RxGalleryFinalApi {
      */
     public RxGalleryFinalApi setImageMultipleResultEvent(RxBusResultDisposable<ImageMultipleResultEvent> t) {
         rxGalleryFinal.image();
-        rxGalleryFinal.subscribe(t);
+        rxGalleryFinal.subscribeGalleryListener(t);
         return mRxApi;
     }
 
@@ -540,7 +542,7 @@ public class RxGalleryFinalApi {
      */
     public RxGalleryFinalApi setVDRadioResultEvent(RxBusResultDisposable<ImageRadioResultEvent> t) {
         rxGalleryFinal.video();
-        rxGalleryFinal.subscribe(t);
+        rxGalleryFinal.subscribeGalleryListener(t);
         return mRxApi;
     }
 
@@ -549,7 +551,7 @@ public class RxGalleryFinalApi {
      */
     public RxGalleryFinalApi setVDMultipleResultEvent(RxBusResultDisposable<ImageMultipleResultEvent> t) {
         rxGalleryFinal.video();
-        rxGalleryFinal.subscribe(t);
+        rxGalleryFinal.subscribeGalleryListener(t);
         return mRxApi;
     }
 

@@ -14,10 +14,10 @@ import android.widget.RadioButton;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.tbruyelle.rxpermissions2.Permission;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 import com.yalantis.ucrop.model.AspectRatio;
 
+import java.io.File;
 import java.util.List;
 
 import cn.finalteam.rxgalleryfinal.RxGalleryFinal;
@@ -25,13 +25,12 @@ import cn.finalteam.rxgalleryfinal.RxGalleryFinalApi;
 import cn.finalteam.rxgalleryfinal.bean.MediaBean;
 import cn.finalteam.rxgalleryfinal.imageloader.ImageLoaderType;
 import cn.finalteam.rxgalleryfinal.rxbus.RxBusResultDisposable;
+import cn.finalteam.rxgalleryfinal.rxbus.event.ImageCropResultEvent;
 import cn.finalteam.rxgalleryfinal.rxbus.event.ImageMultipleResultEvent;
 import cn.finalteam.rxgalleryfinal.rxbus.event.ImageRadioResultEvent;
 import cn.finalteam.rxgalleryfinal.sample.imageloader.ImageLoaderActivity;
 import cn.finalteam.rxgalleryfinal.ui.RxGalleryListener;
 import cn.finalteam.rxgalleryfinal.ui.activity.MediaActivity;
-import cn.finalteam.rxgalleryfinal.ui.base.IMultiImageCheckedListener;
-import cn.finalteam.rxgalleryfinal.ui.base.IRadioImageCheckedListener;
 import cn.finalteam.rxgalleryfinal.utils.Logger;
 import cn.finalteam.rxgalleryfinal.utils.PermissionCheckUtils;
 
@@ -72,36 +71,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mRbOpenC = (RadioButton) findViewById(R.id.rb_openC);
         mRbCropZD = (RadioButton) findViewById(R.id.rb_radio_crop_z);
         mRbCropZVD = (RadioButton) findViewById(R.id.rb_radio_crop_vz);
-        //多选事件的回调
-        RxGalleryListener
-                .getInstance()
-                .setMultiImageCheckedListener(
-                        new IMultiImageCheckedListener() {
-                            @Override
-                            public void selectedImg(Object t, boolean isChecked) {
-                                Toast.makeText(getBaseContext(), isChecked ? "选中" : "取消选中", Toast.LENGTH_SHORT).show();
-                            }
-
-                            @Override
-                            public void selectedImgMax(Object t, boolean isChecked, int maxSize) {
-                                Toast.makeText(getBaseContext(), "你最多只能选择" + maxSize + "张图片", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-        //裁剪图片的回调
-        RxGalleryListener
-                .getInstance()
-                .setRadioImageCheckedListener(
-                        new IRadioImageCheckedListener() {
-                            @Override
-                            public void cropAfter(Object t) {
-                                Toast.makeText(getBaseContext(), t.toString(), Toast.LENGTH_SHORT).show();
-                            }
-
-                            @Override
-                            public boolean isActivityFinish() {
-                                return false;
-                            }
-                        });
 
     }
 
@@ -205,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         rxGalleryFinal.maxSize(8)
                 .imageLoader(ImageLoaderType.FRESCO)
-                .subscribe(new RxBusResultDisposable<ImageMultipleResultEvent>() {
+                .subscribeGalleryListener(new RxBusResultDisposable<ImageMultipleResultEvent>() {
 
                     @Override
                     protected void onEvent(ImageMultipleResultEvent imageMultipleResultEvent) throws Exception {
@@ -230,10 +199,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .with(MainActivity.this)
                 .image()
                 .radio()
-                .cropAspectRatioOptions(0, new AspectRatio("3:3", 30, 10))
+                .cropAspectRatioOptions(0, new AspectRatio("裁切头像", 1, 1))
                 .crop()
                 .imageLoader(ImageLoaderType.FRESCO)
-                .subscribe(new RxBusResultDisposable<ImageRadioResultEvent>() {
+                .subscribeCropListener(new RxBusResultDisposable<ImageCropResultEvent>() {
+                    @Override
+                    protected void onEvent(ImageCropResultEvent baseResultEvent) throws Exception {
+                        Glide.with(getApplicationContext()).load(new File(baseResultEvent.getCropPath())).into(ivPicture);
+                    }
+                })
+                .subscribeGalleryListener(new RxBusResultDisposable<ImageRadioResultEvent>() {
                     @Override
                     protected void onEvent(ImageRadioResultEvent imageRadioResultEvent) throws Exception {
                         Toast.makeText(getBaseContext(), "选中了图片路径：" + imageRadioResultEvent.getResult().getOriginalPath(), Toast.LENGTH_SHORT).show();
@@ -414,16 +389,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     }
                                 })
                         .onCropImageResult(
-                                new IRadioImageCheckedListener() {
+                                new RxBusResultDisposable<ImageCropResultEvent>() {
                                     @Override
-                                    public void cropAfter(Object t) {
-                                        Logger.i("裁剪完成");
-                                    }
-
-                                    @Override
-                                    public boolean isActivityFinish() {
-                                        Logger.i("返回false不关闭，返回true则为关闭");
-                                        return true;
+                                    protected void onEvent(ImageCropResultEvent imageCropResultEvent) throws Exception {
+                                        Toast.makeText(getBaseContext(), "选中了图片路径：" + imageCropResultEvent.getCropPath(), Toast.LENGTH_SHORT).show();
                                     }
                                 });
 
