@@ -2,7 +2,6 @@ package cn.finalteam.rxgalleryfinal.ui.adapter;
 
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.CompoundButtonCompat;
@@ -27,7 +26,7 @@ import cn.finalteam.rxgalleryfinal.Configuration;
 import cn.finalteam.rxgalleryfinal.R;
 import cn.finalteam.rxgalleryfinal.bean.MediaBean;
 import cn.finalteam.rxgalleryfinal.imageloader.FrescoImageLoader;
-import cn.finalteam.rxgalleryfinal.rxbus.RxBus;
+import cn.finalteam.rxgalleryfinal.rxbus.RxBusImpl;
 import cn.finalteam.rxgalleryfinal.rxbus.event.MediaCheckChangeEvent;
 import cn.finalteam.rxgalleryfinal.rxjob.Job;
 import cn.finalteam.rxgalleryfinal.rxjob.RxJob;
@@ -187,7 +186,7 @@ public class MediaGridAdapter extends RecyclerView.Adapter<MediaGridAdapter.Grid
                 checkBox.setChecked(false);
                 Logger.i("=>" + mMediaActivity.getResources().getString(R.string.gallery_image_max_size_tip, mConfiguration.getMaxSize()));
             } else {
-                RxBus.getDefault().post(new MediaCheckChangeEvent(mediaBean));
+                RxBusImpl.getInstance().postEvent(new MediaCheckChangeEvent(mediaBean));
             }
         }
     }

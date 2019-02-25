@@ -1,5 +1,7 @@
 package cn.finalteam.rxgalleryfinal;
 
+import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -12,14 +14,11 @@ import android.widget.Toast;
 import com.yalantis.ucrop.UCropActivity;
 import com.yalantis.ucrop.model.AspectRatio;
 
-import java.util.IllegalFormatCodePointException;
 import java.util.List;
 
 import cn.finalteam.rxgalleryfinal.bean.MediaBean;
 import cn.finalteam.rxgalleryfinal.imageloader.ImageLoaderType;
-import cn.finalteam.rxgalleryfinal.rxbus.RxBus;
-import cn.finalteam.rxgalleryfinal.rxbus.RxBusResultDisposable;
-import cn.finalteam.rxgalleryfinal.rxbus.event.BaseResultEvent;
+import cn.finalteam.rxgalleryfinal.rxbus.RxBusImpl;
 import cn.finalteam.rxgalleryfinal.rxbus.event.ImageCropResultEvent;
 import cn.finalteam.rxgalleryfinal.rxbus.event.ImageMultipleResultEvent;
 import cn.finalteam.rxgalleryfinal.rxbus.event.ImageRadioResultEvent;
@@ -27,23 +26,23 @@ import cn.finalteam.rxgalleryfinal.ui.activity.MediaActivity;
 import cn.finalteam.rxgalleryfinal.utils.Logger;
 import cn.finalteam.rxgalleryfinal.utils.ModelUtils;
 import cn.finalteam.rxgalleryfinal.utils.StorageUtils;
-import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 
 /**
  * Desction: RxGalleryFinal
  * author: pengjianbo  Dujinyang
  * author: karl-dujinyang
  */
-public class RxGalleryFinal {
+public class RxGalleryFinal implements Application.ActivityLifecycleCallbacks {
 
     private Configuration configuration = new Configuration();
-    private RxBusResultDisposable<BaseResultEvent> isRadioDisposable;
-    private RxBusResultDisposable<BaseResultEvent> isCropDisposable;
+    private Consumer isRadioDisposable;
+    private Consumer isCropDisposable;
 
     private RxGalleryFinal() {
     }
 
-    public static RxGalleryFinal with(@NonNull Context context) {
+    public static RxGalleryFinal with(@NonNull Activity context) {
         RxGalleryFinal instance = new RxGalleryFinal();
         instance.configuration.setContext(context.getApplicationContext());
         return instance;
@@ -265,16 +264,16 @@ public class RxGalleryFinal {
     /**
      * 设置回调
      */
-    public RxGalleryFinal subscribeGalleryListener(@NonNull RxBusResultDisposable<? extends BaseResultEvent> rxBusResultSubscriber) {
-        this.isRadioDisposable = (RxBusResultDisposable<BaseResultEvent>) rxBusResultSubscriber;
+    public RxGalleryFinal subscribeGalleryListener(@NonNull Consumer rxBusResultSubscriber) {
+        this.isRadioDisposable = rxBusResultSubscriber;
         return this;
     }
 
     /**
      *
      */
-    public RxGalleryFinal subscribeCropListener(@NonNull RxBusResultDisposable<? extends BaseResultEvent> rxBusResultSunscriber){
-        this.isCropDisposable = (RxBusResultDisposable<BaseResultEvent>) rxBusResultSunscriber;
+    public RxGalleryFinal subscribeCropListener(@NonNull Consumer rxBusResultSunscriber) {
+        this.isCropDisposable = rxBusResultSunscriber;
         return this;
     }
 
@@ -283,6 +282,7 @@ public class RxGalleryFinal {
         //提示
         ModelUtils.logDebug();
         execute();
+        ((Activity)configuration.getContext()).getApplication().registerActivityLifecycleCallbacks(this);
     }
 
     /**
@@ -305,28 +305,19 @@ public class RxGalleryFinal {
         if (isRadioDisposable == null) {
             return;
         }
-        Disposable disposable;
-        if (configuration.isRadio()) {
-            disposable = RxBus.getDefault()
-                    .toObservable(ImageRadioResultEvent.class)
-                    .subscribeWith(isRadioDisposable);
-        } else {
-            disposable = RxBus.getDefault()
-                    .toObservable(ImageMultipleResultEvent.class)
-                    .subscribeWith(isRadioDisposable);
-        }
 
-        Disposable cropDisposable;
-
-        if (configuration.isCrop()&& isCropDisposable!=null){
-            cropDisposable = RxBus.getDefault()
-                    .toObservable(ImageCropResultEvent.class)
-                    .subscribeWith(isCropDisposable);
-            RxBus.getDefault().add(cropDisposable);
+        if (isRadioDisposable != null) {
+            if (configuration.isRadio()) {
+                RxBusImpl.getInstance().addDispositeListner(ImageRadioResultEvent.class,this, isRadioDisposable);
+            } else {
+                RxBusImpl.getInstance().addDispositeListner(ImageMultipleResultEvent.class,this, isRadioDisposable);
+            }
         }
 
 
-
+        if (isCropDisposable != null) {
+            RxBusImpl.getInstance().addDispositeListner(ImageCropResultEvent.class, this,isCropDisposable);
+        }
 
 
         Intent intent = new Intent(context, MediaActivity.class);
@@ -338,4 +329,39 @@ public class RxGalleryFinal {
     }
 
 
+
+    @Override
+    public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+
+    }
+
+    @Override
+    public void onActivityStarted(Activity activity) {
+
+    }
+
+    @Override
+    public void onActivityResumed(Activity activity) {
+
+    }
+
+    @Override
+    public void onActivityPaused(Activity activity) {
+
+    }
+
+    @Override
+    public void onActivityStopped(Activity activity) {
+
+    }
+
+    @Override
+    public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
+
+    }
+
+    @Override
+    public void onActivityDestroyed(Activity activity) {
+        RxBusImpl.getInstance().unscribe(this);
+    }
 }

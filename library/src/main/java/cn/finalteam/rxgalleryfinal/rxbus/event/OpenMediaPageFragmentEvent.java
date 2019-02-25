@@ -3,13 +3,14 @@ package cn.finalteam.rxgalleryfinal.rxbus.event;
 import java.util.ArrayList;
 
 import cn.finalteam.rxgalleryfinal.bean.MediaBean;
+import cn.finalteam.rxgalleryfinal.rxbus.RxMessage;
 
 /**
  * Desction:
  * Author:pengjianbo  Dujinyang
  * Date:16/7/27 下午11:14
  */
-public class OpenMediaPageFragmentEvent {
+public class OpenMediaPageFragmentEvent extends RxMessage {
     private final ArrayList<MediaBean> mediaBeanList;
     private final int position;
 

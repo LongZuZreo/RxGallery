@@ -1,11 +1,13 @@
 package cn.finalteam.rxgalleryfinal.rxbus.event;
 
+import cn.finalteam.rxgalleryfinal.rxbus.RxMessage;
+
 /**
  * Desction:
  * Author:pengjianbo  Dujinyang
  * Date:16/7/30 下午11:23
  */
-public class RequestStorageReadAccessPermissionEvent {
+public class RequestStorageReadAccessPermissionEvent extends RxMessage {
 
     public static final int TYPE_CAMERA = 0;
     public static final int TYPE_WRITE = 1;

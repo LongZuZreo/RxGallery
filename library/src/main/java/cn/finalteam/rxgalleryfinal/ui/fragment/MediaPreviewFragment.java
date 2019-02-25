@@ -19,7 +19,7 @@ import java.util.List;
 import cn.finalteam.rxgalleryfinal.Configuration;
 import cn.finalteam.rxgalleryfinal.R;
 import cn.finalteam.rxgalleryfinal.bean.MediaBean;
-import cn.finalteam.rxgalleryfinal.rxbus.RxBus;
+import cn.finalteam.rxgalleryfinal.rxbus.RxBusImpl;
 import cn.finalteam.rxgalleryfinal.rxbus.event.CloseMediaViewPageFragmentEvent;
 import cn.finalteam.rxgalleryfinal.rxbus.event.MediaCheckChangeEvent;
 import cn.finalteam.rxgalleryfinal.rxbus.event.MediaViewPagerChangedEvent;
@@ -99,7 +99,7 @@ public class MediaPreviewFragment extends BaseFragment implements ViewPager.OnPa
         mViewPager.setCurrentItem(mPagerPosition, false);
         mViewPager.addOnPageChangeListener(this);
         //#ADD UI预览数量的BUG
-        RxBus.getDefault().post(new MediaViewPagerChangedEvent(mPagerPosition, mMediaBeanList.size(), true));
+        RxBusImpl.getInstance().postEvent(new MediaViewPagerChangedEvent(mPagerPosition, mMediaBeanList.size(), true));
     }
 
     @Override
@@ -147,7 +147,7 @@ public class MediaPreviewFragment extends BaseFragment implements ViewPager.OnPa
             mCbCheck.setChecked(mMediaActivity.getCheckedList().contains(mediaBean));
         }
 
-        RxBus.getDefault().post(new MediaViewPagerChangedEvent(position, mMediaBeanList.size(), true));
+        RxBusImpl.getInstance().postEvent(new MediaViewPagerChangedEvent(position, mMediaBeanList.size(), true));
     }
 
     @Override
@@ -167,7 +167,7 @@ public class MediaPreviewFragment extends BaseFragment implements ViewPager.OnPa
                     .getString(R.string.gallery_image_max_size_tip, mConfiguration.getMaxSize()), Toast.LENGTH_SHORT).show();
             mCbCheck.setChecked(false);
         } else {
-            RxBus.getDefault().post(new MediaCheckChangeEvent(mediaBean));
+            RxBusImpl.getInstance().postEvent(new MediaCheckChangeEvent(mediaBean));
         }
     }
 
@@ -175,6 +175,6 @@ public class MediaPreviewFragment extends BaseFragment implements ViewPager.OnPa
     public void onDestroyView() {
         super.onDestroyView();
         mPagerPosition = 0;
-        RxBus.getDefault().post(new CloseMediaViewPageFragmentEvent());
+        RxBusImpl.getInstance().postEvent(new CloseMediaViewPageFragmentEvent());
     }
 }

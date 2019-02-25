@@ -23,8 +23,9 @@ import java.util.List;
 
 import cn.finalteam.rxgalleryfinal.R;
 import cn.finalteam.rxgalleryfinal.bean.MediaBean;
-import cn.finalteam.rxgalleryfinal.rxbus.RxBus;
+import cn.finalteam.rxgalleryfinal.rxbus.RxBusImpl;
 import cn.finalteam.rxgalleryfinal.rxbus.RxBusDisposable;
+import cn.finalteam.rxgalleryfinal.rxbus.RxMessage;
 import cn.finalteam.rxgalleryfinal.rxbus.event.BaseResultEvent;
 import cn.finalteam.rxgalleryfinal.rxbus.event.CloseRxMediaGridPageEvent;
 import cn.finalteam.rxgalleryfinal.rxbus.event.ImageMultipleResultEvent;
@@ -42,6 +43,7 @@ import cn.finalteam.rxgalleryfinal.utils.OsCompat;
 import cn.finalteam.rxgalleryfinal.utils.ThemeUtils;
 import cn.finalteam.rxgalleryfinal.view.ActivityFragmentView;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 
 /**
  * Desction:
@@ -89,8 +91,8 @@ public class MediaActivity extends BaseActivity implements ActivityFragmentView 
                     mMediaGridFragment.hideRvBucketView();
                 } else {
                     if (mCheckedList != null && mCheckedList.size() > 0) {
-                        BaseResultEvent event = new ImageMultipleResultEvent(mCheckedList);
-                        RxBus.getDefault().post(event);
+                        RxMessage event = new ImageMultipleResultEvent(mCheckedList);
+                        RxBusImpl.getInstance().postEvent(event);
                         finish();
                     }
                 }
@@ -277,23 +279,20 @@ public class MediaActivity extends BaseActivity implements ActivityFragmentView 
     }
 
     private void subscribeEvent() {
-        Disposable subscriptionOpenMediaPreviewEvent = RxBus.getDefault().toObservable(OpenMediaPreviewFragmentEvent.class)
-                .map(mediaPreviewEvent -> mediaPreviewEvent)
-                .subscribeWith(new RxBusDisposable<OpenMediaPreviewFragmentEvent>() {
+        RxBusImpl.getInstance()
+                .addDispositeListner(OpenMediaPreviewFragmentEvent.class,this,new Consumer<OpenMediaPreviewFragmentEvent>() {
                     @Override
-                    protected void onEvent(OpenMediaPreviewFragmentEvent openMediaPreviewFragmentEvent) {
+                    public void accept(OpenMediaPreviewFragmentEvent openMediaPreviewFragmentEvent) throws Exception {
                         mPreviewPosition = 0;
                         showMediaPreviewFragment();
                     }
                 });
 
-        RxBus.getDefault().add(subscriptionOpenMediaPreviewEvent);
 
-        Disposable subscriptionMediaCheckChangeEvent = RxBus.getDefault().toObservable(MediaCheckChangeEvent.class)
-                .map(mediaCheckChangeEvent -> mediaCheckChangeEvent)
-                .subscribeWith(new RxBusDisposable<MediaCheckChangeEvent>() {
+       RxBusImpl.getInstance()
+                .addDispositeListner(MediaCheckChangeEvent.class,this,new Consumer<MediaCheckChangeEvent>() {
                     @Override
-                    protected void onEvent(MediaCheckChangeEvent mediaCheckChangeEvent) {
+                    public void accept(MediaCheckChangeEvent mediaCheckChangeEvent) throws Exception {
                         MediaBean mediaBean = mediaCheckChangeEvent.getMediaBean();
                         if (mCheckedList.contains(mediaBean)) {
                             mCheckedList.remove(mediaBean);
@@ -311,16 +310,14 @@ public class MediaActivity extends BaseActivity implements ActivityFragmentView 
                         }
                     }
                 });
-        RxBus.getDefault().add(subscriptionMediaCheckChangeEvent);
 
-        Disposable subscriptionMediaViewPagerChangedEvent = RxBus.getDefault().toObservable(MediaViewPagerChangedEvent.class)
-                .map(mediaViewPagerChangedEvent -> mediaViewPagerChangedEvent)
-                .subscribeWith(new RxBusDisposable<MediaViewPagerChangedEvent>() {
+        RxBusImpl.getInstance()
+                .addDispositeListner(MediaViewPagerChangedEvent.class,this,new Consumer<MediaViewPagerChangedEvent>() {
                     @Override
-                    protected void onEvent(MediaViewPagerChangedEvent mediaPreviewViewPagerChangedEvent) {
-                        int curIndex = mediaPreviewViewPagerChangedEvent.getCurIndex();
-                        int totalSize = mediaPreviewViewPagerChangedEvent.getTotalSize();
-                        if (mediaPreviewViewPagerChangedEvent.isPreview()) {
+                    public void accept(MediaViewPagerChangedEvent mediaViewPagerChangedEvent) throws Exception {
+                        int curIndex = mediaViewPagerChangedEvent.getCurIndex();
+                        int totalSize = mediaViewPagerChangedEvent.getTotalSize();
+                        if (mediaViewPagerChangedEvent.isPreview()) {
                             mPreviewPosition = curIndex;
                         } else {
                             mPagePosition = curIndex;
@@ -328,29 +325,28 @@ public class MediaActivity extends BaseActivity implements ActivityFragmentView 
                         String title = getString(R.string.gallery_page_title, curIndex + 1, totalSize);
                         mTvToolbarTitle.setText(title);
                     }
-                });
-        RxBus.getDefault().add(subscriptionMediaViewPagerChangedEvent);
 
-        Disposable subscriptionCloseRxMediaGridPageEvent = RxBus.getDefault().toObservable(CloseRxMediaGridPageEvent.class)
-                .subscribeWith(new RxBusDisposable<CloseRxMediaGridPageEvent>() {
+                });
+
+        RxBusImpl.getInstance()
+                .addDispositeListner(CloseRxMediaGridPageEvent.class,this,new Consumer<CloseRxMediaGridPageEvent>() {
+
                     @Override
-                    protected void onEvent(CloseRxMediaGridPageEvent closeRxMediaGridPageEvent) throws Exception {
+                    public void accept(CloseRxMediaGridPageEvent closeRxMediaGridPageEvent) throws Exception {
                         finish();
                     }
                 });
-        RxBus.getDefault().add(subscriptionCloseRxMediaGridPageEvent);
 
-        Disposable subscriptionOpenMediaPageFragmentEvent = RxBus.getDefault().toObservable(OpenMediaPageFragmentEvent.class)
-                .subscribeWith(new RxBusDisposable<OpenMediaPageFragmentEvent>() {
+        RxBusImpl.getInstance()
+                .addDispositeListner(OpenMediaPageFragmentEvent.class,this,new Consumer<OpenMediaPageFragmentEvent>() {
                     @Override
-                    protected void onEvent(OpenMediaPageFragmentEvent openMediaPageFragmentEvent) {
+                    public void accept(OpenMediaPageFragmentEvent openMediaPageFragmentEvent) throws Exception {
                         mPageMediaList = openMediaPageFragmentEvent.getMediaBeanList();
                         mPagePosition = openMediaPageFragmentEvent.getPosition();
 
                         showMediaPageFragment(mPageMediaList, mPagePosition);
                     }
                 });
-        RxBus.getDefault().add(subscriptionOpenMediaPageFragmentEvent);
     }
 
     public List<MediaBean> getCheckedList() {
@@ -382,8 +378,7 @@ public class MediaActivity extends BaseActivity implements ActivityFragmentView 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        RxBus.getDefault().removeAllStickyEvents();
-        RxBus.getDefault().clear();
+        RxBusImpl.getInstance().unscribe(this);
         RxJob.getDefault().clearJob();
     }
 
@@ -416,21 +411,21 @@ public class MediaActivity extends BaseActivity implements ActivityFragmentView 
         switch (requestCode) {
             case REQUEST_STORAGE_READ_ACCESS_PERMISSION:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    RxBus.getDefault().post(new RequestStorageReadAccessPermissionEvent(true, RequestStorageReadAccessPermissionEvent.TYPE_WRITE));
+                    RxBusImpl.getInstance().postEvent(new RequestStorageReadAccessPermissionEvent(true, RequestStorageReadAccessPermissionEvent.TYPE_WRITE));
                 } else {
                     finish();
                 }
                 break;
             case REQUEST_STORAGE_WRITE_ACCESS_PERMISSION:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    RxBus.getDefault().post(new RequestStorageReadAccessPermissionEvent(true, RequestStorageReadAccessPermissionEvent.TYPE_WRITE));
+                    RxBusImpl.getInstance().postEvent(new RequestStorageReadAccessPermissionEvent(true, RequestStorageReadAccessPermissionEvent.TYPE_WRITE));
                 } else {
                     finish();
                 }
                 break;
             case REQUEST_CAMERA_ACCESS_PERMISSION:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    RxBus.getDefault().post(new RequestStorageReadAccessPermissionEvent(true, RequestStorageReadAccessPermissionEvent.TYPE_CAMERA));
+                    RxBusImpl.getInstance().postEvent(new RequestStorageReadAccessPermissionEvent(true, RequestStorageReadAccessPermissionEvent.TYPE_CAMERA));
                 }
                 break;
             default:

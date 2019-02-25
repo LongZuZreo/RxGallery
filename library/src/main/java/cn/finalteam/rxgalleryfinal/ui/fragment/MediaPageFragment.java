@@ -19,7 +19,7 @@ import java.util.List;
 import cn.finalteam.rxgalleryfinal.Configuration;
 import cn.finalteam.rxgalleryfinal.R;
 import cn.finalteam.rxgalleryfinal.bean.MediaBean;
-import cn.finalteam.rxgalleryfinal.rxbus.RxBus;
+import cn.finalteam.rxgalleryfinal.rxbus.RxBusImpl;
 import cn.finalteam.rxgalleryfinal.rxbus.event.CloseMediaViewPageFragmentEvent;
 import cn.finalteam.rxgalleryfinal.rxbus.event.MediaCheckChangeEvent;
 import cn.finalteam.rxgalleryfinal.rxbus.event.MediaViewPagerChangedEvent;
@@ -175,7 +175,7 @@ public class MediaPageFragment extends BaseFragment implements ViewPager.OnPageC
             mCbCheck.setChecked(false);
         }
 
-        RxBus.getDefault().post(new MediaViewPagerChangedEvent(position, mMediaBeanList.size(), false));
+        RxBusImpl.getInstance().postEvent(new MediaViewPagerChangedEvent(position, mMediaBeanList.size(), false));
     }
 
     @Override
@@ -199,7 +199,7 @@ public class MediaPageFragment extends BaseFragment implements ViewPager.OnPageC
                     .getString(R.string.gallery_image_max_size_tip, mConfiguration.getMaxSize()), Toast.LENGTH_SHORT).show();
             mCbCheck.setChecked(false);
         } else {
-            RxBus.getDefault().post(new MediaCheckChangeEvent(mediaBean));
+            RxBusImpl.getInstance().postEvent(new MediaCheckChangeEvent(mediaBean));
         }
     }
 
@@ -207,7 +207,7 @@ public class MediaPageFragment extends BaseFragment implements ViewPager.OnPageC
     public void onDestroyView() {
         super.onDestroyView();
         mItemClickPosition = 0;
-        RxBus.getDefault().removeStickyEvent(OpenMediaPageFragmentEvent.class);
-        RxBus.getDefault().post(new CloseMediaViewPageFragmentEvent());
+        RxBusImpl.getInstance().unscribe(this);
+        RxBusImpl.getInstance().postEvent(new CloseMediaViewPageFragmentEvent());
     }
 }

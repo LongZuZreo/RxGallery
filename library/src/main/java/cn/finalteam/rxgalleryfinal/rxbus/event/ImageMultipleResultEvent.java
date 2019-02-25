@@ -3,13 +3,14 @@ package cn.finalteam.rxgalleryfinal.rxbus.event;
 import java.util.List;
 
 import cn.finalteam.rxgalleryfinal.bean.MediaBean;
+import cn.finalteam.rxgalleryfinal.rxbus.RxMessage;
 
 /**
  * Desction:
  * Author:pengjianbo  Dujinyang
  * Date:16/8/1 下午10:52
  */
-public class ImageMultipleResultEvent implements BaseResultEvent {
+public class ImageMultipleResultEvent extends RxMessage {
     private final List<MediaBean> mediaResultList;
 
     public ImageMultipleResultEvent(List<MediaBean> list) {

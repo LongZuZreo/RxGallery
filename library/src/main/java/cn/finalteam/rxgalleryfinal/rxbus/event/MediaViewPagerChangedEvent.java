@@ -1,11 +1,13 @@
 package cn.finalteam.rxgalleryfinal.rxbus.event;
 
+import cn.finalteam.rxgalleryfinal.rxbus.RxMessage;
+
 /**
  * Desction:
  * Author:pengjianbo  Dujinyang
  * Date:16/7/25 下午3:45
  */
-public class MediaViewPagerChangedEvent {
+public class MediaViewPagerChangedEvent extends RxMessage {
 
     private final int curIndex;
     private final int totalSize;

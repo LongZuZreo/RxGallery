@@ -1,6 +1,8 @@
 package cn.finalteam.rxgalleryfinal.rxbus.event;
 
-public class ImageCropResultEvent implements BaseResultEvent {
+import cn.finalteam.rxgalleryfinal.rxbus.RxMessage;
+
+public class ImageCropResultEvent extends RxMessage {
 
     public ImageCropResultEvent(String cropPath) {
         this.cropPath = cropPath;

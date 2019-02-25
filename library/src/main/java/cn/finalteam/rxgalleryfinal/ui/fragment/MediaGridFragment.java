@@ -43,7 +43,7 @@ import cn.finalteam.rxgalleryfinal.bean.BucketBean;
 import cn.finalteam.rxgalleryfinal.bean.ImageCropBean;
 import cn.finalteam.rxgalleryfinal.bean.MediaBean;
 import cn.finalteam.rxgalleryfinal.presenter.impl.MediaGridPresenterImpl;
-import cn.finalteam.rxgalleryfinal.rxbus.RxBus;
+import cn.finalteam.rxgalleryfinal.rxbus.RxBusImpl;
 import cn.finalteam.rxgalleryfinal.rxbus.RxBusDisposable;
 import cn.finalteam.rxgalleryfinal.rxbus.event.CloseMediaViewPageFragmentEvent;
 import cn.finalteam.rxgalleryfinal.rxbus.event.ImageCropResultEvent;
@@ -55,7 +55,6 @@ import cn.finalteam.rxgalleryfinal.rxbus.event.RequestStorageReadAccessPermissio
 import cn.finalteam.rxgalleryfinal.ui.activity.MediaActivity;
 import cn.finalteam.rxgalleryfinal.ui.adapter.BucketAdapter;
 import cn.finalteam.rxgalleryfinal.ui.adapter.MediaGridAdapter;
-import cn.finalteam.rxgalleryfinal.ui.base.IRadioImageCheckedListener;
 import cn.finalteam.rxgalleryfinal.ui.widget.FooterAdapter;
 import cn.finalteam.rxgalleryfinal.ui.widget.HorizontalDividerItemDecoration;
 import cn.finalteam.rxgalleryfinal.ui.widget.MarginDecoration;
@@ -75,6 +74,7 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 
@@ -124,9 +124,6 @@ public class MediaGridFragment extends BaseFragment implements MediaGridView, Re
     private String mBucketId = String.valueOf(Integer.MIN_VALUE);
 
     private MediaActivity mMediaActivity;
-    private Disposable mMediaCheckChangeDisposable;
-    private Disposable mCloseMediaViewPageFragmentDisposable;
-    private Disposable mRequestStorageReadAccessPermissionDisposable;
 
     private SlideInUnderneathAnimation slideInUnderneathAnimation;
     private SlideOutUnderneathAnimation slideOutUnderneathAnimation;
@@ -334,36 +331,34 @@ public class MediaGridFragment extends BaseFragment implements MediaGridView, Re
     }
 
     /**
-     * RxBus
+     * RxBusImpl
      */
     private void subscribeEvent() {
-        mMediaCheckChangeDisposable = RxBus.getDefault().toObservable(MediaCheckChangeEvent.class)
-                .subscribeWith(new RxBusDisposable<MediaCheckChangeEvent>() {
+        RxBusImpl.getInstance()
+                .addDispositeListner(MediaCheckChangeEvent.class,this,new Consumer<MediaCheckChangeEvent>() {
                     @Override
-                    protected void onEvent(MediaCheckChangeEvent mediaCheckChangeEvent) {
+                    public void accept(MediaCheckChangeEvent mediaCheckChangeEvent) throws Exception {
                         if (mMediaActivity.getCheckedList().size() == 0) {
                             mTvPreview.setEnabled(false);
                         } else {
                             mTvPreview.setEnabled(true);
                         }
-
                     }
-                });
-        RxBus.getDefault().add(mMediaCheckChangeDisposable);
 
-        mCloseMediaViewPageFragmentDisposable = RxBus.getDefault().toObservable(CloseMediaViewPageFragmentEvent.class)
-                .subscribeWith(new RxBusDisposable<CloseMediaViewPageFragmentEvent>() {
+                });
+
+        RxBusImpl.getInstance()
+                .addDispositeListner(CloseMediaViewPageFragmentEvent.class,this,new Consumer<CloseMediaViewPageFragmentEvent>() {
                     @Override
-                    protected void onEvent(CloseMediaViewPageFragmentEvent closeMediaViewPageFragmentEvent) throws Exception {
+                    public void accept(CloseMediaViewPageFragmentEvent closeMediaViewPageFragmentEvent) throws Exception {
                         mMediaGridAdapter.notifyDataSetChanged();
                     }
                 });
-        RxBus.getDefault().add(mCloseMediaViewPageFragmentDisposable);
 
-        mRequestStorageReadAccessPermissionDisposable = RxBus.getDefault().toObservable(RequestStorageReadAccessPermissionEvent.class)
-                .subscribeWith(new RxBusDisposable<RequestStorageReadAccessPermissionEvent>() {
+        RxBusImpl.getInstance()
+                .addDispositeListner(RequestStorageReadAccessPermissionEvent.class,this,new Consumer<RequestStorageReadAccessPermissionEvent>() {
                     @Override
-                    protected void onEvent(RequestStorageReadAccessPermissionEvent requestStorageReadAccessPermissionEvent) throws Exception {
+                    public void accept(RequestStorageReadAccessPermissionEvent requestStorageReadAccessPermissionEvent) throws Exception {
                         if (requestStorageReadAccessPermissionEvent.getType() == RequestStorageReadAccessPermissionEvent.TYPE_WRITE) {
                             if (requestStorageReadAccessPermissionEvent.isSuccess()) {
                                 mMediaGridPresenter.getMediaList(mBucketId, mPage, LIMIT);
@@ -377,7 +372,6 @@ public class MediaGridFragment extends BaseFragment implements MediaGridView, Re
                         }
                     }
                 });
-        RxBus.getDefault().add(mRequestStorageReadAccessPermissionDisposable);
 
     }
 
@@ -518,7 +512,7 @@ public class MediaGridFragment extends BaseFragment implements MediaGridView, Re
                     List<MediaBean> list = mMediaBeanList.subList(1, mMediaBeanList.size());
                     gridMediaList.addAll(list);
                 }
-                RxBus.getDefault().post(new OpenMediaPageFragmentEvent(gridMediaList, pos));
+                RxBusImpl.getInstance().postEvent(new OpenMediaPageFragmentEvent(gridMediaList, pos));
             }
         }
     }
@@ -549,7 +543,7 @@ public class MediaGridFragment extends BaseFragment implements MediaGridView, Re
     private void setPostMediaBean(MediaBean mediaBean) {
         ImageCropBean bean = new ImageCropBean();
         bean.copyMediaBean(mediaBean);
-        RxBus.getDefault().post(new ImageRadioResultEvent(bean));
+        RxBusImpl.getInstance().postEvent(new ImageRadioResultEvent(bean));
     }
 
     /**
@@ -685,7 +679,7 @@ public class MediaGridFragment extends BaseFragment implements MediaGridView, Re
     private void onCropFinished() {
         if (mCropPath != null) {
             if (mConfiguration.isCrop()) {
-                RxBus.getDefault().post(new ImageCropResultEvent(mCropPath.getPath()));
+                RxBusImpl.getInstance().postEvent(new ImageCropResultEvent(mCropPath.getPath()));
             }
         } else {
             Logger.i("# CropPath is null！# ");
@@ -741,7 +735,7 @@ public class MediaGridFragment extends BaseFragment implements MediaGridView, Re
     public void onClick(View v) {
         int id = v.getId();
         if (id == R.id.tv_preview) {
-            RxBus.getDefault().post(new OpenMediaPreviewFragmentEvent());
+            RxBusImpl.getInstance().postEvent(new OpenMediaPreviewFragmentEvent());
         } else if (id == R.id.tv_folder_name) {
             v.setEnabled(false);
             if (isShowRvBucketView()) {
@@ -848,9 +842,7 @@ public class MediaGridFragment extends BaseFragment implements MediaGridView, Re
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        RxBus.getDefault().remove(mMediaCheckChangeDisposable);
-        RxBus.getDefault().remove(mCloseMediaViewPageFragmentDisposable);
-
+        RxBusImpl.getInstance().unscribe(this);
     }
 
     /**

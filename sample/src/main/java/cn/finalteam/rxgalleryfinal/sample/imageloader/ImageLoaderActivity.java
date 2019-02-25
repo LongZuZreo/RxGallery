@@ -8,11 +8,13 @@ import android.view.View;
 import android.widget.Toast;
 
 import cn.finalteam.rxgalleryfinal.RxGalleryFinal;
+import cn.finalteam.rxgalleryfinal.imageloader.GlideImageLoader;
 import cn.finalteam.rxgalleryfinal.imageloader.ImageLoaderType;
 import cn.finalteam.rxgalleryfinal.rxbus.RxBusResultDisposable;
 import cn.finalteam.rxgalleryfinal.rxbus.event.ImageRadioResultEvent;
 import cn.finalteam.rxgalleryfinal.sample.R;
 import cn.finalteam.rxgalleryfinal.utils.Logger;
+import io.reactivex.functions.Consumer;
 
 /**
  * by y on 2017/6/7.
@@ -66,11 +68,12 @@ public class ImageLoaderActivity extends AppCompatActivity {
         with.image()
                 .radio()
                 .gif(appCompatCheckBox.isChecked())
-                .imageLoader(imageLoaderType)
-                .subscribeGalleryListener(new RxBusResultDisposable<ImageRadioResultEvent>() {
+                .imageLoader(ImageLoaderType.GLIDE)
+                .subscribeGalleryListener(new Consumer<ImageRadioResultEvent>() {
                     @Override
-                    protected void onEvent(ImageRadioResultEvent imageRadioResultEvent) throws Exception {
+                    public void accept(ImageRadioResultEvent imageRadioResultEvent) throws Exception {
                         Toast.makeText(getBaseContext(), "选中了图片路径：" + imageRadioResultEvent.getResult().getOriginalPath(), Toast.LENGTH_SHORT).show();
+
                     }
                 }).openGallery();
     }

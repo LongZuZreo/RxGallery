@@ -1,5 +1,6 @@
 package cn.finalteam.rxgalleryfinal.ui.activity;
 
+import android.app.Application;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.LayoutRes;
